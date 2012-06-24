@@ -28,6 +28,8 @@ class Lite
         $dbh = new \PDO($dsn, $this->config['user'], $this->config['password']);
         $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->connections[$name] = $dbh;
+
+        return true;
     }
 
     public function getConnection($name = null)
