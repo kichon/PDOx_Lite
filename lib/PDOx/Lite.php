@@ -1,141 +1,36 @@
 <?php
-
 namespace PDOx;
+
+require_once __DIR__.'/Autoloader.php';
+use PDOx\Autoloader,
+    PDOx\Lite\Schema;
 
 class Lite
 {
-    protected $default = array(
-            'driver'    => 'mysql',
-            'host'      => 'localhost',
-            'dbname'    => 'test',
-            'root'      => 'root',
-            'password'  => ''
-        );
+    private static $class = null;
 
-    protected $config;
-    protected $connections = array();
-    protected $prefix = "_";
-    protected $wherePrefix = "W_";
+    private $schema = null;
+    private $abstract = null;
+    private $connector = null;
+    private $dbh = null;
 
-    public function connect($name, $config = array())
+    public function __construct($config = array())
     {
-        $this->config = array_merge(
-                $this->default,
-                $config
-            );
+        Autoloader::register();
 
-        $dsn = sprintf('%s:host=%s;dbname=%s', $this->config['driver'], $this->config['host'], $this->config['dbname']);
-        $dbh = new \PDO($dsn, $this->config['user'], $this->config['password']);
-        $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->connections[$name] = $dbh;
+        if (is_null($this->schema))
+            $this->schema = new Schema();
 
-        return true;
+        if (!($this->schema instanceof PDOx\Lite\Schema))
+            throw new Exception('schema must be a PDOx::Lite::Schema object');
     }
 
-    public function getConnection($name = null)
+    public static function connect($config = array())
     {
-        if (is_null($name)) {
-            return current($this->connections);
-        }
+        if (self::$class != null)
+            return self::$class;
 
-        return $this->connections[$name];
-    }
+        self::$class = new Lite($config);
 
-    public function exec($sql)
-    {
-        $dbh = $this->getConnection();
-        $dbh->exec($sql);
-    }
-    
-    public function select($table, $column, $where)
-    {
-        $sql = sprintf("SELECT %s FROM %s", implode(',', $column), $table);
-        $sql = $sql . $this->createWhere($where);
-        $whereParams = $this->getWhereParams($where);
-
-        $dbh = $this->getConnection();
-        $sth = $dbh->prepare($sql);
-        $sth->execute($whereParams);
-
-        return $sth;
-    }
-
-    public function insert($table, $values)
-    {
-        $sqlValues = array();
-        foreach ($values as $k => $v) {
-            $sqlValues[] = ":".$this->prefix.$k;
-        }
-        $sql = sprintf("INSERT INTO %s ( %s ) VALUES ( %s )", $table, implode(',', array_keys($values)), implode(',', $sqlValues));
-        $bindValues = $this->getBindValues($values);
-
-        $dbh = $this->getConnection();
-        $sth = $dbh->prepare($sql);
-        $sth->execute($bindValues);
-    }
-
-    public function update($table, $values, $where)
-    {
-        $sqlValues = array();
-        foreach ($values as $k => $v) {
-            $sqlValues[] = $k.'=:'.$this->prefix.$k;
-        }
-        $sql = sprintf("UPDATE %s SET %s", $table, implode(',', $sqlValues));
-        $sql = $sql.$this->createWhere($where);
-        $whereParams = $this->getWhereParams($where);
-        $bindValues = $this->getBindValues($values);
-
-        $dbh = $this->getConnection();
-        $sth = $dbh->prepare($sql);
-        $sth->execute(array_merge($bindValues, $whereParams));
-    }
-
-    public function delete($table, $where)
-    {
-        $sql = sprintf("DELETE FROM %s", $table);
-        $sql = $sql.$this->createWhere($where);
-
-        $whereParams = $this->getWhereParams($where);
-
-        $dbh = $this->getConnection();
-        $sth = $dbh->prepare($sql);
-        $sth->execute($whereParams);
-    }
-
-    private function createWhere($where)
-    {
-        if (empty($where)) return null;
-
-        $whereSql = array();
-        foreach ($where as $k => $v) {
-            $whereSql[] = $k.' = :'.$this->wherePrefix.$k;
-        }
-
-        return " WHERE ".join(" AND ", $whereSql);
-    }
-
-    private function getWhereParams($values)
-    {
-        if (empty($values)) return null;
-
-        $bindValues = array();
-        foreach ($values as $k => $v) {
-            $bindValues[":".$this->wherePrefix.$k] = $v;
-        }
-
-        return $bindValues;
-    }
-
-
-    private function getBindValues($values)
-    {
-        if (empty($values)) return null;
-
-        $bindValues = array();
-        foreach ($values as $k => $v) {
-            $bindValues[":".$this->prefix.$k] = $v;
-        }
-
-        return $bindValues;
     }
 }
