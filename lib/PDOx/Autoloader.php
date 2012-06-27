@@ -9,10 +9,8 @@ class Autoloader
 
     public static function register($dirname = __DIR__)
     {
-        if (is_null(self::$base_dir)) {
-            self::$base_dir = $dirname;
-            spl_autoload_register(array(__CLASS__, "autoload"));
-        }
+        self::$base_dir = $dirname;
+        spl_autoload_register(array(__CLASS__, "autoload"));
     }
 
     public static function unregister()
@@ -23,9 +21,6 @@ class Autoloader
     public static function autoload($name)
     {
         $retval = false;
-
-        var_dump($name);
-        exit;
 
         if (strpos($name, self::NAME_SPACE) === 0) {
             $parts = explode("\\", $name);
