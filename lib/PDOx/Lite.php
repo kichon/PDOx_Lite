@@ -14,6 +14,7 @@ class Lite
 
     private static $class = null;
 
+
     public function __construct($config = array())
     {
         if (is_null($this->schema))
@@ -55,5 +56,11 @@ class Lite
         );
 
         return $package;
+    }
+
+    public function dbh_do($callback = array()) {
+        $sth = call_user_func($callback);
+        $sth->setFetchMode(\PDO::FETCH_ASSOC);
+        return $sth->fetch();
     }
 }

@@ -5,8 +5,12 @@ use PDOx\Lite\Row;
 
 class ResultSet
 {
+    protected $prefix = "_";
+    protected $wherePrefix = "W_";
+
     private $pdox_lite;
     private $table;
+    private $where = array();
 
     public function __construct($conf = array())
     {
@@ -16,8 +20,33 @@ class ResultSet
 
     public function all()
     {
-        $stmt = $this->select(array('*'));
-        return array_map(array($this, 'inflate_row'), $stmt->fetchAll());
+        $sth = $this->select(array('*'));
+        $sth->setFetchMode(\PDO::FETCH_ASSOC);
+        return array_map(array($this, 'inflate_row'), $sth->fetchAll());
+    }
+
+    public function search($where = array())
+    {
+        $this->where = $where;
+        return $this;
+    }
+
+    public function single()
+    {
+        $row = $this->pdox_lite->dbh_do(array($this, "select_sth"));
+        return $this->inflate_row($row);
+    }
+
+    public function select_sth()
+    {
+        $sql = sprintf("SELECT * FROM %s", $this->table->getName());
+        $sql = $sql . $this->createWhere($this->where);
+        $whereParams = $this->getWhereParams($this->where);
+        $dbh = $this->pdox_lite->dbh;
+        $sth = $dbh->prepare($sql);
+        $sth->execute($whereParams);
+
+        return $sth;
     }
 
     public function select($column = array(), $where = array())

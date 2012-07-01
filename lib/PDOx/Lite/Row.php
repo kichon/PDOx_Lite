@@ -16,4 +16,9 @@ class Row
             $this->$column = $arr[$column];
         }
     }
+
+    public function __get($name)
+    {
+        return isset($this->data[$name]) ? $this->data[$name] : null;
+    }
 }

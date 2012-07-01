@@ -13,8 +13,6 @@ $pdox = PDOx\Lite::connect(
     )
 );
 
-$res = $pdox->table('user')->all();
+$row = $pdox->table('user')->search(array('id' => 1))->single();
 
-foreach ($res as $row) {
-    echo "id: $row->id, name: $row->name", PHP_EOL;
-}
+echo "id: $row->id, name: $row->name", PHP_EOL;
