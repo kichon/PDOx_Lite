@@ -45,6 +45,11 @@ class Lite
         return self::$class;
     }
 
+    public function schema()
+    {
+        return $this->schema;
+    }
+
     public function table($table_name)
     {
         $table = $this->schema->table($table_name);
