@@ -59,8 +59,6 @@ class Lite
     }
 
     public function dbh_do($callback = array()) {
-        $sth = call_user_func($callback);
-        $sth->setFetchMode(\PDO::FETCH_ASSOC);
-        return $sth->fetch();
+        return call_user_func($callback);
     }
 }

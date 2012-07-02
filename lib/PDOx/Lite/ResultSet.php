@@ -10,6 +10,7 @@ class ResultSet
 
     private $pdox_lite;
     private $table;
+    private $sth;
     private $where = array();
 
     public function __construct($conf = array())
@@ -33,7 +34,22 @@ class ResultSet
 
     public function single()
     {
-        $row = $this->pdox_lite->dbh_do(array($this, "select_sth"));
+        $sth = $this->pdox_lite->dbh_do(array($this, "select_sth"));
+        $sth->setFetchMode(\PDO::FETCH_ASSOC);
+        $row = $sth->fetch();
+        return $this->inflate_row($row);
+    }
+
+    public function next()
+    {
+        if (!isset($this->sth)) {
+            $this->sth = $this->pdox_lite->dbh_do(array($this, "select_sth"));
+        }
+        $this->sth->setFetchMode(\PDO::FETCH_ASSOC);
+        $row = $this->sth->fetch();
+
+        if (!$row) return null;
+
         return $this->inflate_row($row);
     }
 
