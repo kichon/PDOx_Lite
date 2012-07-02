@@ -65,6 +65,19 @@ class ResultSet
         return $row[0];
     }
 
+    public function get_column($column = array())
+    {
+        if (empty($column))
+            throw new \Exception("get_column() requires a column name");
+
+        $sth = $this->pdox_lite->dbh_do(
+            array($this, "select"),
+            $column
+        );
+        $sth->setFetchMode(\PDO::FETCH_ASSOC);
+        return $sth->fetchAll();
+    }
+
     public function select_sth()
     {
         $sql = sprintf("SELECT * FROM %s", $this->table->getName());
@@ -77,12 +90,11 @@ class ResultSet
         return $sth;
     }
 
-    public function select($column = array(), $where = array())
+    public function select($column = array())
     {
         $sql = sprintf("SELECT %s FROM %s", implode(',', $column), $this->table->getName());
-        $sql = $sql . $this->createWhere($where);
-        $whereParams = $this->getWhereParams($where);
-
+        $sql = $sql . $this->createWhere($this->where);
+        $whereParams = $this->getWhereParams($this->where);
         $dbh = $this->pdox_lite->dbh;
         $sth = $dbh->prepare($sql);
         $sth->execute($whereParams);
