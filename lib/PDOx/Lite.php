@@ -58,7 +58,7 @@ class Lite
         return $package;
     }
 
-    public function dbh_do($callback = array()) {
-        return call_user_func($callback);
+    public function dbh_do($callback = array(), $params = array()) {
+        return call_user_func($callback, $params);
     }
 }

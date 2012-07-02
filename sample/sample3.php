@@ -13,8 +13,6 @@ $pdox = PDOx\Lite::connect(
     )
 );
 
-$users = $pdox->table('user')->search(array('name' => 'kichon'));
+$count = $pdox->table('user')->search(array('name' => 'kichon'))->count();
 
-while ($user = $users->next()) {
-    echo "id: $user->id, name: $user->name", PHP_EOL;
-}
+var_dump($count);

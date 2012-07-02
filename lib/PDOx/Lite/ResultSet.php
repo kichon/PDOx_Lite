@@ -53,6 +53,18 @@ class ResultSet
         return $this->inflate_row($row);
     }
 
+    public function count()
+    {
+        $sth = $this->pdox_lite->dbh_do(
+            array($this, "select"),
+            array("count(*)")
+        );
+        $sth->setFetchMode(\PDO::FETCH_NUM);
+        $row = $sth->fetch();
+
+        return $row[0];
+    }
+
     public function select_sth()
     {
         $sql = sprintf("SELECT * FROM %s", $this->table->getName());
