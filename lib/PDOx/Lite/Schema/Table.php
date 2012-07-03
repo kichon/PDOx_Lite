@@ -26,4 +26,9 @@ class Table
         }
         return $this->autopk;
     }
+
+    public function __get($name)
+    {
+        return isset($this->$name) ? $this->$name : null;
+    }
 }

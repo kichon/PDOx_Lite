@@ -78,6 +78,17 @@ class ResultSet
         return $sth->fetchAll();
     }
 
+    public function find($param)
+    {
+        $where = array();
+
+        $autopk = null;
+        if (is_null($this->table->autopk))
+            throw new \Exception("you must do autopk() before find.");
+        $where[$this->table->autopk] = $param;
+        return $this->search($where)->single();
+    }
+
     public function select_sth()
     {
         $sql = sprintf("SELECT * FROM %s", $this->table->getName());

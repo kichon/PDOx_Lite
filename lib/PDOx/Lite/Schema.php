@@ -14,7 +14,8 @@ class Schema
 
     public function table($table_name)
     {
-        $this->tables[$table_name] = new Table(array('name' => $table_name));
+        if (!isset($this->tables[$table_name]))
+            $this->tables[$table_name] = new Table(array('name' => $table_name));
 
         return $this->tables[$table_name];
     }
